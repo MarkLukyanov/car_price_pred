@@ -3,8 +3,8 @@
 ## Обзор
 
 ## Файлы
-- 'app.py'
-- 'model.py'
+- `app.py`
+- `model.py`
 - 'requirements.txt'
 - 'model.pickle'
 - ''
