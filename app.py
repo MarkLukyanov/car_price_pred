@@ -25,37 +25,38 @@ def main():
     # if button is pressed
     if button:
         # make prediction
-        result = predict(year, km_driven, mileage, engine, max_power, seats, fuel, seller_type, transmission, owner)
-        st.success(f'Цена автомобиля {result} у.е.')
-
-
-
+        result = predict_(year, km_driven, mileage, engine, max_power, seats, fuel, seller_type, transmission, owner)
+        st.write(f'Цена автомобиля {int(result)} у.е.')
 
 
 # load the train model
 with open('model.pickle', 'rb') as rf:
     model = pickle.load(rf)
 
+with open('scaler.pickle', 'rb') as rf_:
+    scaler = pickle.load(rf_)
 
-def predict(year, km_driven, mileage, engine, max_power, seats, fuel, seller_type, transmission, owner):
+
+def predict_(year, km_driven, mileage, engine, max_power, seats, fuel, seller_type, transmission, owner):
     # processing user input
-    # f = [1, 0, 0, 0] if fuel == 'Сжатый природный газ (метан)' else [0, 1, 0, 0] if fuel == 'Дизель'\
-    #     else [0, 0, 1, 0] if fuel == 'Сжиженный газ (пропан-бутан)' else [0, 0, 0, 1]
-    #
-    # s = [1, 0, 0] if seller_type == 'Дилер' else [0, 1, 0] if seller_type == 'Собственник' else [0, 0, 1]
-    #
-    # t = [1, 0] if transmission == 'Автомат' else [0, 1]
-    #
-    # o = [1, 0, 0, 0, 0] if owner == '1' else [0, 1, 0, 0, 0] if owner == '4 и более' else [0, 0, 1, 0, 0] if owner == '2'\
-    #     else [0, 0, 0, 1, 0] if owner == '0' else [0, 0, 0, 0, 1]
+    f = [1, 0, 0, 0] if fuel == 'Сжатый природный газ (метан)' else [0, 1, 0, 0] if fuel == 'Дизель'\
+        else [0, 0, 1, 0] if fuel == 'Сжиженный газ (пропан-бутан)' else [0, 0, 0, 1]
 
-    lists = [year, km_driven, mileage, engine, max_power, seats]
+    s = [1, 0, 0] if seller_type == 'Дилер' else [0, 1, 0] if seller_type == 'Собственник' else [0, 0, 1]
+
+    t = [1, 0] if transmission == 'Автомат' else [0, 1]
+
+    o = [1, 0, 0, 0, 0] if owner == '1' else [0, 1, 0, 0, 0] if owner == '4 и более' else [0, 0, 1, 0, 0] if owner == '2'\
+        else [0, 0, 0, 1, 0] if owner == '0' else [0, 0, 0, 0, 1]
+
+    lists = [year, km_driven, mileage, engine, max_power, seats, *f, *s, *t, *o]
     df = pd.DataFrame(lists).transpose()
+    df = pd.DataFrame(scaler.transform(df), columns=df.columns)
     # making predictions using the train model
     prediction = model.predict(df)
-    result = int(prediction)
+    result = prediction
     return result
-
+    # return df
 
 
 if __name__ == '__main__':
